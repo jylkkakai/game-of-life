@@ -36,7 +36,7 @@ const (
 var gameFont font.Face
 
 type Game struct {
-	gameGrid [gameGridHeight][gameGridHeight]bool
+	gameGrid [gameGridHeight][gameGridWidth]bool
 }
 
 func init() {
@@ -56,12 +56,21 @@ func init() {
 }
 
 func (g *Game) Update() error {
+	// log.Println(ebiten.CursorPosition())
+	if ebiten.IsMouseButtonPressed(ebiten.MouseButtonLeft) {
+		log.Println(ebiten.CursorPosition())
+		x, y := ebiten.CursorPosition()
+		if x < gameAreaRightEdge && x > gameAreaLeftEdge && y < gameAreaBottomEdge && y > gameAreaTopEdge {
+			g.gameGrid[int((y-topBorder)/gridSqrSize)][int((x-leftBorder)/gridSqrSize)] = true
+		}
+	}
 	return nil
 }
 
 func (g *Game) Draw(screen *ebiten.Image) {
 	// ebitenutil.DebugPrint(screen, "Hello, World!")
 
+	// log.Println(gameGridWidth, gameGridHeight)
 	screen.Fill(color.Gray{200})
 	// vector.DrawFilledRect(screen, 0, 0, scrWidth, scrHeight, color.Gray{200}, false)
 	text.Draw(screen, "Game", gameFont, 50, 70, color.Black)
@@ -75,6 +84,13 @@ func (g *Game) Draw(screen *ebiten.Image) {
 	}
 	for i := 1; i < gameGridHeight; i++ {
 		vector.StrokeLine(screen, gameAreaLeftEdge, float32(gameAreaTopEdge+i*gridSqrSize), gameAreaRightEdge-1, float32(gameAreaTopEdge+i*gridSqrSize), 1, color.Gray{220}, false)
+	}
+	for i := 0; i < gameGridHeight; i++ {
+		for j := 0; j < gameGridWidth; j++ {
+			if g.gameGrid[i][j] {
+				vector.DrawFilledRect(screen, float32(gameAreaLeftEdge+j*gridSqrSize), float32(gameAreaTopEdge+i*gridSqrSize), gridSqrSize, gridSqrSize, color.Gray{50}, false)
+			}
+		}
 	}
 
 }
