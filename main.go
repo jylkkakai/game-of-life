@@ -3,16 +3,17 @@ package main
 import (
 	"image/color"
 	"log"
+	"math/rand"
 
 	"github.com/hajimehoshi/ebiten/v2"
 	// "github.com/hajimehoshi/ebiten/v2/ebitenutil"
 	"github.com/hajimehoshi/ebiten/v2/text"
 
 	"golang.org/x/image/font"
-	"golang.org/x/image/font/opentype"
+	// "golang.org/x/image/font/opentype"
 
-	"golang.org/x/image/font/gofont/goregular"
-	// "github.com/hajimehoshi/ebiten/v2/inpututil"
+	// "golang.org/x/image/font/gofont/goregular"
+	"github.com/hajimehoshi/ebiten/v2/inpututil"
 	// "github.com/hajimehoshi/ebiten/v2/text"
 	"github.com/hajimehoshi/ebiten/v2/vector"
 )
@@ -28,51 +29,139 @@ const (
 	gameAreaRightEdge  = scrWidth - rightBorder
 	gameAreaTopEdge    = topBorder
 	gameAreaBottomEdge = scrHeight - bottomBorder
-	gridSqrSize        = 20
+	gridSqrSize        = 5
 	gameGridWidth      = int((gameAreaRightEdge - gameAreaLeftEdge) / gridSqrSize)
 	gameGridHeight     = int((gameAreaBottomEdge - gameAreaTopEdge) / gridSqrSize)
 )
 
-var gameFont font.Face
+var (
+	gameFont     font.Face
+	startButton  button
+	clearButton  button
+	randomButton button
+	tickCounter  int = 0
+	delay        int = 20
+)
 
 type Game struct {
 	gameGrid [gameGridHeight][gameGridWidth]bool
-}
-
-func init() {
-	f, err := opentype.Parse(goregular.TTF)
-	if err != nil {
-		log.Fatal(err)
-	}
-	face, err := opentype.NewFace(f, &opentype.FaceOptions{
-		Size: 32,
-		DPI:  72,
-	})
-	if err != nil {
-		log.Fatal(err)
-	}
-
-	gameFont = face
+	gameIsOn bool
 }
 
 func (g *Game) Update() error {
-	// log.Println(ebiten.CursorPosition())
-	if ebiten.IsMouseButtonPressed(ebiten.MouseButtonLeft) {
-		log.Println(ebiten.CursorPosition())
-		x, y := ebiten.CursorPosition()
-		if x < gameAreaRightEdge && x > gameAreaLeftEdge && y < gameAreaBottomEdge && y > gameAreaTopEdge {
-			g.gameGrid[int((y-topBorder)/gridSqrSize)][int((x-leftBorder)/gridSqrSize)] = true
+	x, y := ebiten.CursorPosition()
+	// log.Println(startButton)
+	if startButton.isHovered(x, y) {
+		startButton.colorBackground = colorBtnHoverBG
+		if inpututil.IsMouseButtonJustPressed(ebiten.MouseButtonLeft) {
+			startButton.isClicked = true
+			if g.gameIsOn {
+				startButton.label = "Start"
+				g.gameIsOn = false
+
+			} else {
+				startButton.label = "Stop"
+				g.gameIsOn = true
+
+			}
+		}
+	} else {
+		startButton.colorBackground = colorBtnBG
+	}
+	if clearButton.isHovered(x, y) {
+		clearButton.colorBackground = colorBtnHoverBG
+
+		if inpututil.IsMouseButtonJustPressed(ebiten.MouseButtonLeft) {
+			var newGrid [gameGridHeight][gameGridWidth]bool
+			g.gameGrid = newGrid
+		}
+	} else {
+		clearButton.colorBackground = colorBtnBG
+	}
+	if randomButton.isHovered(x, y) {
+		randomButton.colorBackground = colorBtnHoverBG
+
+		if inpututil.IsMouseButtonJustPressed(ebiten.MouseButtonLeft) {
+			rndCounter := int(gameGridHeight * gameGridWidth / 10)
+			for rndCounter > 0 {
+				rndX := rand.Intn(gameGridHeight)
+				rndY := rand.Intn(gameGridWidth)
+				if !g.gameGrid[rndX][rndY] {
+					g.gameGrid[rndX][rndY] = true
+					rndCounter--
+				}
+			}
+		}
+	} else {
+		randomButton.colorBackground = colorBtnBG
+	}
+
+	if inpututil.IsMouseButtonJustReleased(ebiten.MouseButtonLeft) {
+		if startButton.isClicked {
+			startButton.isClicked = false
 		}
 	}
+
+	if ebiten.IsMouseButtonPressed(ebiten.MouseButtonLeft) {
+		if x < gameAreaRightEdge && x > gameAreaLeftEdge && y < gameAreaBottomEdge && y > gameAreaTopEdge {
+			g.gameGrid[int((y-topBorder)/gridSqrSize)][int((x-leftBorder)/gridSqrSize)] = true
+			// g.gameGhid[int((y-topBorder)/gridSqrSize)][int((x-leftBorder)/gridSqrSize)] = !g.gameGrid[int((y-topBorder)/gridSqrSize)][int((x-leftBorder)/gridSqrSize)]
+
+		}
+	}
+
+	if g.gameIsOn {
+		clearButton.isDisabled = true
+
+		if tickCounter == delay {
+			var newGrid [gameGridHeight][gameGridWidth]bool
+			for i := 0; i < gameGridHeight; i++ {
+				for j := 0; j < gameGridWidth; j++ {
+
+					numOfNeighbours := getNumOfNeighbours(g.gameGrid, j, i)
+
+					if numOfNeighbours == 3 || numOfNeighbours == 2 && g.gameGrid[i][j] {
+						newGrid[i][j] = true
+					}
+				}
+			}
+			g.gameGrid = newGrid
+			tickCounter = 0
+		}
+		tickCounter++
+	}
+
 	return nil
+}
+func max(x, y int) int {
+	if x > y {
+		return x
+	}
+	return y
+}
+func min(x, y int) int {
+	if x > y {
+		return y
+	}
+	return x
+}
+func getNumOfNeighbours(arr [gameGridHeight][gameGridWidth]bool, x, y int) int {
+
+	var num int
+	for i := max(0, y-1); i <= min(y+1, gameGridHeight-1); i++ {
+		for j := max(0, x-1); j <= min(x+1, gameGridWidth-1); j++ {
+
+			if arr[i][j] && !(x == j && y == i) {
+				num++
+			}
+		}
+	}
+	return num
 }
 
 func (g *Game) Draw(screen *ebiten.Image) {
-	// ebitenutil.DebugPrint(screen, "Hello, World!")
 
-	// log.Println(gameGridWidth, gameGridHeight)
 	screen.Fill(color.Gray{200})
-	// vector.DrawFilledRect(screen, 0, 0, scrWidth, scrHeight, color.Gray{200}, false)
 	text.Draw(screen, "Game", gameFont, 50, 70, color.Black)
 	text.Draw(screen, "of", gameFont, 80, 110, color.Black)
 	text.Draw(screen, "Life", gameFont, 70, 150, color.Black)
@@ -92,6 +181,9 @@ func (g *Game) Draw(screen *ebiten.Image) {
 			}
 		}
 	}
+	startButton.draw(screen)
+	clearButton.draw(screen)
+	randomButton.draw(screen)
 
 }
 
