@@ -31,7 +31,7 @@ func init() {
 		log.Fatal(err)
 	}
 	startButton = button{
-		posX:            40,
+		posX:            50,
 		posY:            300,
 		w:               100,
 		h:               40,
@@ -42,7 +42,7 @@ func init() {
 		colorEdgeline:   colorBtnLine,
 	}
 	clearButton = button{
-		posX:            40,
+		posX:            50,
 		posY:            500,
 		w:               100,
 		h:               40,
@@ -53,7 +53,7 @@ func init() {
 		colorEdgeline:   colorBtnLine,
 	}
 	randomButton = button{
-		posX:            40,
+		posX:            50,
 		posY:            400,
 		w:               100,
 		h:               40,

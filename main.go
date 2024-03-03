@@ -52,36 +52,38 @@ func (g *Game) Update() error {
 	x, y := ebiten.CursorPosition()
 	// log.Println(startButton)
 	if startButton.isHovered(x, y) {
-		startButton.colorBackground = colorBtnHoverBG
+		startButton.setHovered()
 		if inpututil.IsMouseButtonJustPressed(ebiten.MouseButtonLeft) {
-			startButton.isClicked = true
+			startButton.setClicked()
 			if g.gameIsOn {
 				startButton.label = "Start"
 				g.gameIsOn = false
-
+				randomButton.toggleDisabled()
+				clearButton.toggleDisabled()
 			} else {
 				startButton.label = "Stop"
 				g.gameIsOn = true
-
+				randomButton.toggleDisabled()
+				clearButton.toggleDisabled()
 			}
 		}
 	} else {
-		startButton.colorBackground = colorBtnBG
+		startButton.reSet()
 	}
 	if clearButton.isHovered(x, y) {
-		clearButton.colorBackground = colorBtnHoverBG
-
-		if inpututil.IsMouseButtonJustPressed(ebiten.MouseButtonLeft) {
+		clearButton.setHovered()
+		if inpututil.IsMouseButtonJustPressed(ebiten.MouseButtonLeft) && !clearButton.isDisabled {
+			clearButton.setClicked()
 			var newGrid [gameGridHeight][gameGridWidth]bool
 			g.gameGrid = newGrid
 		}
 	} else {
-		clearButton.colorBackground = colorBtnBG
+		clearButton.reSet()
 	}
 	if randomButton.isHovered(x, y) {
-		randomButton.colorBackground = colorBtnHoverBG
-
-		if inpututil.IsMouseButtonJustPressed(ebiten.MouseButtonLeft) {
+		randomButton.setHovered()
+		if inpututil.IsMouseButtonJustPressed(ebiten.MouseButtonLeft) && !randomButton.isDisabled {
+			randomButton.setClicked()
 			rndCounter := int(gameGridHeight * gameGridWidth / 10)
 			for rndCounter > 0 {
 				rndX := rand.Intn(gameGridHeight)
@@ -93,13 +95,13 @@ func (g *Game) Update() error {
 			}
 		}
 	} else {
-		randomButton.colorBackground = colorBtnBG
+		randomButton.reSet()
 	}
 
 	if inpututil.IsMouseButtonJustReleased(ebiten.MouseButtonLeft) {
-		if startButton.isClicked {
-			startButton.isClicked = false
-		}
+		startButton.reSet()
+		clearButton.reSet()
+		randomButton.reSet()
 	}
 
 	if ebiten.IsMouseButtonPressed(ebiten.MouseButtonLeft) {
@@ -111,8 +113,6 @@ func (g *Game) Update() error {
 	}
 
 	if g.gameIsOn {
-		clearButton.isDisabled = true
-
 		if tickCounter == delay {
 			var newGrid [gameGridHeight][gameGridWidth]bool
 			for i := 0; i < gameGridHeight; i++ {

@@ -31,22 +31,59 @@ type button struct {
 	colorEdgeline   color.Gray16
 
 	isClicked  bool
-	hovered    bool
 	isDisabled bool
 }
 
 var (
-	colorBtnBG      = color.Gray{170}
-	colorBtnHoverBG = color.Gray{200}
-	colorBtnLine    = color.Black
-	colorBtnLabel   = color.Black
+	colorBtnBG       = color.Gray{170}
+	colorBtnHoverBG  = color.Gray{200}
+	colorBtnLine     = color.Black
+	colorBtnLabel    = color.Black
+	colorBtnDisabled = color.Gray16{40000}
 )
 
 func (b *button) isHovered(x, y int) bool {
 	return float32(x) > b.posX && float32(x) < b.posX+b.w && float32(y) > b.posY && float32(y) < b.posY+b.h
 
 }
+func (b *button) setHovered() {
+	b.colorBackground = colorBtnHoverBG
+}
+func (b *button) setClicked() {
+	if !b.isClicked {
+		b.isClicked = true
+		b.posX = b.posX + 1
+		b.posY = b.posY + 1
+		b.w = b.w - 2
+		b.h = b.h - 2
+	}
+}
+func (b *button) toggleDisabled() {
+	if b.isDisabled {
+		b.isDisabled = false
+		b.colorLabel = colorBtnLabel
+		b.colorEdgeline = colorBtnLine
+		b.colorBackground = colorBtnBG
+	} else {
+		b.isDisabled = true
+		b.colorLabel = colorBtnDisabled
+		b.colorEdgeline = colorBtnDisabled
+		b.colorBackground = colorBtnHoverBG
 
+	}
+}
+func (b *button) reSet() {
+	if !b.isDisabled {
+		b.colorBackground = colorBtnBG
+	}
+	if b.isClicked {
+		b.isClicked = false
+		b.posX = b.posX - 1
+		b.posY = b.posY - 1
+		b.w = b.w + 2
+		b.h = b.h + 2
+	}
+}
 func (b *button) draw(screen *ebiten.Image) {
 
 	vector.DrawFilledRect(screen, b.posX, b.posY, b.w, b.h, b.colorBackground, false)
