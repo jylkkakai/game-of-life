@@ -3,9 +3,8 @@ package main
 import (
 	"log"
 
-	"golang.org/x/image/font/opentype"
-
 	"golang.org/x/image/font/gofont/goregular"
+	"golang.org/x/image/font/opentype"
 )
 
 func init() {

@@ -2,19 +2,11 @@ package main
 
 import (
 	"image/color"
-	// "log"
+
 	"github.com/hajimehoshi/ebiten/v2"
 	"github.com/hajimehoshi/ebiten/v2/text"
 	"github.com/hajimehoshi/ebiten/v2/vector"
 	"golang.org/x/image/font"
-	// "github.com/hajimehoshi/ebiten/v2/ebitenutil"
-	// "github.com/hajimehoshi/ebiten/v2/text"
-	// "golang.org/x/image/font"
-	// "golang.org/x/image/font/opentype"
-	// "golang.org/x/image/font/gofont/goregular"
-	// "github.com/hajimehoshi/ebiten/v2/inpututil"
-	// "github.com/hajimehoshi/ebiten/v2/text"
-	// "github.com/hajimehoshi/ebiten/v2/vector"
 )
 
 type button struct {
@@ -87,6 +79,16 @@ func (b *button) reSet() {
 func (b *button) draw(screen *ebiten.Image) {
 
 	vector.DrawFilledRect(screen, b.posX, b.posY, b.w, b.h, b.colorBackground, false)
-	vector.StrokeRect(screen, b.posX, b.posY, b.w, b.h, 2, b.colorEdgeline, false)
-	text.Draw(screen, b.label, b.labelFont, int(b.posX)+10, int(b.posY)+30, b.colorLabel)
+	// vector.StrokeRect(screen, b.posX, b.posY, b.w, b.h, 2, b.colorEdgeline, false)
+	vector.StrokeLine(screen, b.posX+2, b.posY, b.posX+b.w-2, b.posY, 2, b.colorEdgeline, false)
+	vector.StrokeLine(screen, b.posX+b.w-2, b.posY, b.posX+b.w, b.posY+2, 2, b.colorEdgeline, false)
+	vector.StrokeLine(screen, b.posX+b.w, b.posY+2, b.posX+b.w, b.posY+b.h-2, 2, b.colorEdgeline, false)
+	vector.StrokeLine(screen, b.posX+b.w, b.posY+b.h-2, b.posX+b.w-2, b.posY+b.h, 2, b.colorEdgeline, false)
+	vector.StrokeLine(screen, b.posX+b.w-2, b.posY+b.h, b.posX+2, b.posY+b.h, 2, b.colorEdgeline, false)
+	vector.StrokeLine(screen, b.posX+2, b.posY+b.h, b.posX, b.posY+b.h-2, 2, b.colorEdgeline, false)
+	vector.StrokeLine(screen, b.posX, b.posY+b.h-2, b.posX, b.posY+2, 2, b.colorEdgeline, false)
+	vector.StrokeLine(screen, b.posX, b.posY+2, b.posX+2, b.posY, 2, b.colorEdgeline, false)
+
+	labelOffset := (b.w - float32(font.MeasureString(b.labelFont, b.label).Round())) / 2
+	text.Draw(screen, b.label, b.labelFont, int(b.posX)+int(labelOffset), int(b.posY)+27, b.colorLabel)
 }

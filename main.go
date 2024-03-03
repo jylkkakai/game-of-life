@@ -6,16 +6,10 @@ import (
 	"math/rand"
 
 	"github.com/hajimehoshi/ebiten/v2"
-	// "github.com/hajimehoshi/ebiten/v2/ebitenutil"
-	"github.com/hajimehoshi/ebiten/v2/text"
-
-	"golang.org/x/image/font"
-	// "golang.org/x/image/font/opentype"
-
-	// "golang.org/x/image/font/gofont/goregular"
 	"github.com/hajimehoshi/ebiten/v2/inpututil"
-	// "github.com/hajimehoshi/ebiten/v2/text"
+	"github.com/hajimehoshi/ebiten/v2/text"
 	"github.com/hajimehoshi/ebiten/v2/vector"
+	"golang.org/x/image/font"
 )
 
 const (
@@ -107,7 +101,6 @@ func (g *Game) Update() error {
 	if ebiten.IsMouseButtonPressed(ebiten.MouseButtonLeft) {
 		if x < gameAreaRightEdge && x > gameAreaLeftEdge && y < gameAreaBottomEdge && y > gameAreaTopEdge {
 			g.gameGrid[int((y-topBorder)/gridSqrSize)][int((x-leftBorder)/gridSqrSize)] = true
-			// g.gameGhid[int((y-topBorder)/gridSqrSize)][int((x-leftBorder)/gridSqrSize)] = !g.gameGrid[int((y-topBorder)/gridSqrSize)][int((x-leftBorder)/gridSqrSize)]
 
 		}
 	}
